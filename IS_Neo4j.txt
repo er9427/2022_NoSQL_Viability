@@ -1,0 +1,41 @@
+
+LOAD CSV WITH HEADERS FROM "file:///Amazon_Topics_Neo.csv" AS line
+
+CREATE (:Review {Title: line.`reviews.title`, Rating: line.`reviews.rating`, Review: line.`reviews.text`, 
+`Topic Dist`: line.`Topic Word Distribution per review`})
+
+MATCH (n:Review) RETURN n LIMIT 25
+
+LOAD CSV WITH HEADERS FROM "file:///Amazon_Topics_Neo.csv" AS line
+CREATE (:Customer {Name: line.username, `Topic Dist`: line.`Topic Word Distribution per review`})
+LOAD CSV WITH HEADERS FROM "file:///Amazon_Topics_Neo.csv" AS line
+CREATE (:Date {DateAdded: line.dateAdded, RevAdded: line.date, `Topic Dist`: line.`Topic Word Distribution per review`})
+LOAD CSV WITH HEADERS FROM "file:///Amazon_Topics_Neo.csv" AS line
+CREATE (:Product {Name: line.name, Category: line.categories, Brand: line.brand, Manufacturer: line.manufacturer, ManufacturerNum: line.manufacturerNumber,
+`Topic Dist`: line.`Topic Word Distribution per review`})
+LOAD CSV WITH HEADERS FROM "file:///Amazon_Topics_Neo.csv" AS line
+CREATE (:Topic {Level1: line.`Level 1 topics`, Level2: line.`Level 2 topics`, Level3: line.`Level 3 topics`, `Topic Dist`: line.`Topic Word Distribution per review`})
+
+
+MATCH (n) RETURN n
+
+// notice that there are no relationships. We need to build those relationships using the PK and FK relationships
+// in the relational database. The WHERE claus has the "join" criteria. 
+// We then create only the relationships between the two existing nodes. The direction is from the Custome to Earnings.
+
+
+MATCH (n1:Review)
+MATCH (n2:Customer)
+MATCH (n3:Date)
+MATCH (n4:Product)
+MATCH (n5:Topic)
+WHERE n1.`Topic Dist` = n2.`Topic Dist` = n3.`Topic Dist` = n4.`Topic Dist` = n5.`Topic Dist`
+CREATE (n2)-[:CUSTOMER]->(n1), (n3)-[:DATE]->(n1), (n4)-[:PRODUCT]->(n1), (n5)-[:TOPIC]->(n1),
+(n3)-[:DATECUST]->(n2), (n4)-[:PRODCUST]->(n2), (n5)-[:TOPCUST]->(n2), (n4)-[:PRODDATE]->(n3), 
+(n5)-[:TOPDATE]->(n3), (n5)-[:TOPPROD]->(n4)
+
+// NGraph
+
+MATCH(n) RETURN n
+
+MATCH (t:Topic)-[r]->(e:Review) RETURN t, r, e
